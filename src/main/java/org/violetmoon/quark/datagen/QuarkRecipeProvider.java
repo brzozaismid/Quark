@@ -256,7 +256,14 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
         for (DyeColor dyeColor : FramedGlassModule.blockMap.keySet()) {
             dyedFramedGlassRecipe(FramedGlassModule.blockMap.get(dyeColor).getBlock(), dyeColor)
                     .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
+                    .group("stained_glass")
                     .save(recipeOutput.withConditions(zCond("framed_glass")), "quark:building/crafting/glass/" + dyeColor.getName() + "_framed_glass");
+        }
+        for (DyeColor dyeColor : FramedGlassModule.paneMap.keySet()) {
+            dyedFramedGlassPaneRecipe(FramedGlassModule.paneMap.get(dyeColor).getBlock(), dyeColor)
+                    .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
+                    .group("stained_glass_pane")
+                    .save(recipeOutput.withConditions(zCond("framed_glass")), "quark:building/crafting/panes/dye/" + dyeColor.getName() + "_framed_glass_pane");
         }
         //hollowlogs
         for (Block sourceLog : HollowLogsModule.logMap.keySet()) {
@@ -284,6 +291,7 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
         for (DyeColor dyeColor : FramedGlassModule.paneMap.keySet()) {
             paneRecipe(FramedGlassModule.paneMap.get(dyeColor).getBlock(), FramedGlassModule.blockMap.get(dyeColor).getBlock())
                     .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
+                    .group("stained_glass_pane")
                     .save(recipeOutput.withConditions(zCond("framed_glass")), "quark:building/crafting/panes/" + dyeColor.getName() + "_framed_glass_pane");
         }
         paneRecipe(FramedGlassModule.framed_glass_pane, FramedGlassModule.framed_glass)
@@ -653,7 +661,7 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
                 .define('#', NewStoneTypesModule.polishedBlocks.get(NewStoneTypesModule.myaliteBlock))
                 .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
                 .save(recipeOutput.withConditions(and(zCond("stone_bricks"), zCond("myalite"))), "quark:building/crafting/stonevariants/worldstones/myalite_bricks");
-        stoneVariantsChiseledAndPillar("myalite", zCond("myalite"), MoreStoneVariantsModule.blocks.get(25), MoreStoneVariantsModule.blocks.get(25), Quark.ZETA.variantRegistry.slabs.get(MoreStoneVariantsModule.blocks.get(24)), Quark.ZETA.variantRegistry.slabs.get(NewStoneTypesModule.polishedBlocks.get(NewStoneTypesModule.myaliteBlock)), recipeOutput);
+        stoneVariantsChiseledAndPillar("myalite", zCond("myalite"), MoreStoneVariantsModule.blocks.get(25), MoreStoneVariantsModule.blocks.get(26), Quark.ZETA.variantRegistry.slabs.get(MoreStoneVariantsModule.blocks.get(24)), Quark.ZETA.variantRegistry.slabs.get(NewStoneTypesModule.polishedBlocks.get(NewStoneTypesModule.myaliteBlock)), recipeOutput);
         //no polished tuff/tuff bricks, they are vanilla now
 
         //vertplanks (world category vertplanks next)
@@ -1313,6 +1321,16 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
                 .define('#', Blocks.MOSSY_COBBLESTONE)
                 .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
                 .save(recipeOutput.withConditions(zCond("cobblestone_bricks")), "quark:building/crafting/mossy_cobblestone_bricks");
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, MoreBrickTypesModule.blocks.get(5), 1)
+                        .requires(MoreBrickTypesModule.blocks.get(4))
+                        .requires(Blocks.MOSS_BLOCK)
+                        .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
+                        .save(recipeOutput.withConditions(zCond("cobblestone_bricks")), "quark:building/crafting/mossy_cobblestone_bricks_from_moss_block");
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, MoreBrickTypesModule.blocks.get(5), 1)
+                        .requires(MoreBrickTypesModule.blocks.get(4))
+                        .requires(Blocks.VINE)
+                        .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
+                        .save(recipeOutput.withConditions(zCond("cobblestone_bricks")), "quark:building/crafting/mossy_cobblestone_bricks_from_vine");
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, MoreBrickTypesModule.blocks.get(6), 4)
                 .pattern("C#")
                 .pattern("##")
@@ -2149,7 +2167,20 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
                 .requires(FramedGlassModule.framed_glass)
                 .requires(FramedGlassModule.framed_glass)
                 .requires(FramedGlassModule.framed_glass)
-                .requires(DyeItem.byColor(dye));
+                .requires(DataUtil.getDyeItemTag(dye));
+    }
+
+    public static ShapelessRecipeBuilder dyedFramedGlassPaneRecipe(ItemLike output, DyeColor dye){
+        return ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, output, 8)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(FramedGlassModule.framed_glass_pane)
+                .requires(DataUtil.getDyeItemTag(dye));
     }
 
     public static ShapedRecipeBuilder paneRecipe(ItemLike output, ItemLike glass) {
@@ -2276,7 +2307,7 @@ public class QuarkRecipeProvider extends RecipeProvider implements IConditionBui
                 .pattern("SDS")
                 .pattern("SSS")
                 .define('S', ShinglesModule.blocks.getFirst())
-                .define('D', DyeItem.byColor(color))
+                .define('D', DataUtil.getDyeItemTag(color))
                 .unlockedBy("test", PlayerTrigger.TriggerInstance.tick())
                 .save(recipeOutput, "quark:building/crafting/shingles/" + color.getName() + "_shingles_dye");
     }

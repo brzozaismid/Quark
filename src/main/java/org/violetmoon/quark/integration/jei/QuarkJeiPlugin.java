@@ -28,9 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +38,7 @@ import org.violetmoon.quark.addons.oddities.client.screen.BackpackInventoryScree
 import org.violetmoon.quark.addons.oddities.client.screen.CrateScreen;
 import org.violetmoon.quark.addons.oddities.module.MatrixEnchantingModule;
 import org.violetmoon.quark.addons.oddities.util.Influence;
+import org.violetmoon.quark.addons.oddities.util.InfluenceLocations;
 import org.violetmoon.quark.base.Quark;
 import org.violetmoon.quark.base.components.QuarkDataComponents;
 import org.violetmoon.quark.content.building.module.VariantFurnacesModule;
@@ -60,7 +59,8 @@ import java.util.stream.Stream;
 
 @JeiPlugin
 public class QuarkJeiPlugin implements IModPlugin {
-    private static final ResourceLocation UID = Quark.asResource(Quark.MOD_ID);
+    // Zeta will get JEI's event bus if we load the Quark class now
+    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(Quark.MOD_ID, Quark.MOD_ID);
 
     public static final RecipeType<InfluenceEntry> INFLUENCING =
             RecipeType.create(Quark.MOD_ID, "influence", InfluenceEntry.class);
@@ -189,17 +189,17 @@ public class QuarkJeiPlugin implements IModPlugin {
         registration.addRecipes(INFLUENCING,
                 Arrays.stream(DyeColor.values()).map(color -> {
                     Block candle = MatrixEnchantingTableBlockEntity.CANDLES.get(color.getId());
-                    Influence influence = MatrixEnchantingModule.candleInfluences.get(color).toInfluence();
+                    InfluenceLocations influenceLocations = MatrixEnchantingModule.candleInfluences.get(color);
 
-                    return new InfluenceEntry(candle, influence);
+                    return new InfluenceEntry(candle, influenceLocations);
                 }).filter(InfluenceEntry::hasAny).collect(Collectors.toList()));
 
         registration.addRecipes(INFLUENCING,
                 MatrixEnchantingModule.customInfluences.entrySet().stream().map(entry -> {
                     Block block = entry.getKey().getBlock();
-                    Influence influence = entry.getValue().influence().toInfluence();
+                    InfluenceLocations influenceLocations = entry.getValue().influence();
 
-                    return new InfluenceEntry(block, influence);
+                    return new InfluenceEntry(block, influenceLocations);
                 }).filter(InfluenceEntry::hasAny).collect(Collectors.toList()));
     }
 
