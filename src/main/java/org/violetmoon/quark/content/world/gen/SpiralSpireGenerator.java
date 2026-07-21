@@ -13,7 +13,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 
@@ -39,10 +38,16 @@ public class SpiralSpireGenerator extends MultiChunkFeatureGenerator {
 		if(!SpiralSpiresModule.biomes.canSpawn(biome))
 			return;
 
-		while(world.getBlockState(pos).getBlock() != Blocks.END_STONE) {
+		// Find the first solid block from the top.
+		while(true) {
+			BlockState state = world.getBlockState(pos);
+
+			if(state.canOcclude())
+				break;
+
 			pos = pos.below();
 
-			if(pos.getY() < 10)
+			if(pos.getY() < world.getMinBuildHeight())
 				return;
 		}
 
@@ -63,10 +68,13 @@ public class SpiralSpireGenerator extends MultiChunkFeatureGenerator {
 		int start = -5;
 		int y = start;
 
+		// Make sure the spike has room to generate.
 		for(; y < height; y++) {
 			BlockPos test = pos.above(y);
 			BlockState state = world.getBlockState(test);
-			if(!state.isAir() && !(state.getBlock() == Blocks.END_STONE || state.getBlock() == Blocks.CRYING_OBSIDIAN || state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == SpiralSpiresModule.myalite_crystal))
+
+			// Abort if we'd intersect another solid structure.
+			if(!state.isAir() && state.canOcclude())
 				return;
 		}
 		y = start;
@@ -82,7 +90,9 @@ public class SpiralSpireGenerator extends MultiChunkFeatureGenerator {
 				for(int j = -ri + 1; j < ri; j++)
 					if((i * i + j * j) <= (ri * ri)) {
 						boolean edge = i == (-ri + 1) || i == (ri - 1) || j == (-ri + 1) || j == (ri - 1);
-						BlockState state = (edge && rand.nextFloat() < 0.2 ? NewStoneTypesModule.myaliteBlock : SpiralSpiresModule.dusky_myalite).defaultBlockState();
+						BlockState state = (edge && rand.nextFloat() < 0.2
+								? NewStoneTypesModule.myaliteBlock
+								: SpiralSpiresModule.dusky_myalite).defaultBlockState();
 						world.setBlock(pos.offset(i, y, j), state, 2);
 					}
 		}
